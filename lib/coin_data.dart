@@ -1,3 +1,9 @@
+import 'dart:convert';
+
+import 'package:bitcoin_ticker/generated/json/base/json_convert_content.dart';
+import 'package:bitcoin_ticker/generated/json/base/json_filed.dart';
+import 'package:http/http.dart' as http;
+
 const List<String> currenciesList = [
   'AUD',
   'BRL',
@@ -28,4 +34,25 @@ const List<String> cryptoList = [
   'LTC',
 ];
 
-class CoinData {}
+const String coinAPIKey = '902D9E47-F9F2-476D-A3E5-CD34138F911A';
+const String coinAPIUrl = 'https://rest.coinapi.io';
+
+class CoinData with JsonConvert<CoinData> {
+  String time;
+  @JSONField(name: "asset_id_base")
+  String assetIdBase;
+  @JSONField(name: "asset_id_quote")
+  String assetIdQuote;
+  double rate;
+
+  static Future<CoinData> getFromAPI({String base, String quote}) async {
+    http.Response response = await http.get(
+      '$coinAPIUrl/v1/exchangerate/$base/$quote',
+      headers: {'X-CoinAPI-Key': coinAPIKey},
+    );
+    if (response.statusCode >= 300) {
+      throw Exception('Hu Oh ! Error #${response.statusCode}');
+    }
+    return CoinData().fromJson(jsonDecode(response.body));
+  }
+}
