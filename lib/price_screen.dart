@@ -60,13 +60,14 @@ class _PriceScreenState extends State<PriceScreen> {
 
   void _updateUI(String currency) {
     setState(() => dataList.clear());
-    Future.wait(cryptoList
-            .map((base) => CoinData.getFromAPI(base: base, quote: currency)))
-        .then((coinDataList) => setState(() {
-              selectedCurrency = currency;
-              dataList = Map.fromEntries(coinDataList
-                  .map((coinData) => MapEntry(coinData.assetIdBase, coinData)));
-            }));
+    Future.wait(cryptoList.map(
+      (base) => CoinData.getFromAPI(base: base, quote: currency),
+    )).then((coinDataList) => setState(() {
+          selectedCurrency = currency;
+          dataList = Map.fromEntries(coinDataList.map(
+            (coinData) => MapEntry(coinData.assetIdBase, coinData),
+          ));
+        }));
   }
 
   @override
