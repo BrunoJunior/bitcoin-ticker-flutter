@@ -11,7 +11,7 @@ class PriceScreen extends StatefulWidget {
 
 class _PriceScreenState extends State<PriceScreen> {
   String selectedCurrency;
-  Map<String, CoinData> dataList = Map();
+  Map<String, CoinData> dataList = {};
 
   DropdownButton<String> _androidDropdown() {
     return DropdownButton<String>(
@@ -35,39 +35,22 @@ class _PriceScreenState extends State<PriceScreen> {
   }
 
   Widget _changeCard(String baseCurrency) {
+    CoinData dataCoin = dataList[baseCurrency] ?? CoinData()
+      ..assetIdBase = baseCurrency
+      ..assetIdQuote = selectedCurrency;
     return Padding(
       padding: EdgeInsets.fromLTRB(18.0, 18.0, 18.0, 0),
-      child: Card(
-        color: Colors.lightBlueAccent,
-        elevation: 5.0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10.0),
-        ),
-        child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 28.0),
-          child: Text(
-            '1 $baseCurrency = ${dataList[baseCurrency]?.rate?.toStringAsFixed(2) ?? '?'} $selectedCurrency',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 20.0,
-              color: Colors.white,
-            ),
-          ),
-        ),
-      ),
+      child: ChangeCard(dataCoin),
     );
   }
 
-  void _updateUI(String currency) {
+  void _updateUI(String currency) async {
     setState(() => dataList.clear());
-    Future.wait(cryptoList.map(
-      (base) => CoinData.getFromAPI(base: base, quote: currency),
-    )).then((coinDataList) => setState(() {
-          selectedCurrency = currency;
-          dataList = Map.fromEntries(coinDataList.map(
-            (coinData) => MapEntry(coinData.assetIdBase, coinData),
-          ));
-        }));
+    Map<String, CoinData> data = await CoinData.getAllFromAPI(currency);
+    setState(() {
+      selectedCurrency = currency;
+      dataList = data;
+    });
   }
 
   @override
@@ -98,6 +81,33 @@ class _PriceScreenState extends State<PriceScreen> {
             child: Platform.isIOS ? _iOSPicker() : _androidDropdown(),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class ChangeCard extends StatelessWidget {
+  final CoinData dataCoin;
+  ChangeCard(this.dataCoin);
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: Colors.lightBlueAccent,
+      elevation: 5.0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10.0),
+      ),
+      child: Padding(
+        padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 28.0),
+        child: Text(
+          '1 ${dataCoin.assetIdBase} = ${dataCoin.rate?.toStringAsFixed(2) ?? '?'} ${dataCoin.assetIdQuote}',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 20.0,
+            color: Colors.white,
+          ),
+        ),
       ),
     );
   }

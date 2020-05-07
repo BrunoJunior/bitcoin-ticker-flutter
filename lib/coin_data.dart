@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:bitcoin_ticker/generated/json/base/json_convert_content.dart';
@@ -54,5 +55,14 @@ class CoinData with JsonConvert<CoinData> {
       throw Exception('Hu Oh ! Error #${response.statusCode}');
     }
     return CoinData().fromJson(jsonDecode(response.body));
+  }
+
+  static Future<Map<String, CoinData>> getAllFromAPI(String quote) async {
+    List<CoinData> list = await Future.wait(cryptoList.map(
+      (base) => CoinData.getFromAPI(base: base, quote: quote),
+    ));
+    return Map.fromEntries(
+      list.map((coinData) => MapEntry(coinData.assetIdBase, coinData)),
+    );
   }
 }
