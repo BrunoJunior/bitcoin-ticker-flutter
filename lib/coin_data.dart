@@ -35,7 +35,7 @@ const List<String> cryptoList = [
   'LTC',
 ];
 
-const String coinAPIKey = '902D9E47-F9F2-476D-A3E5-CD34138F911A';
+const String coinAPIKey = 'YOUR-API-KEY';
 const String coinAPIUrl = 'https://rest.coinapi.io';
 
 class CoinData with JsonConvert<CoinData> {
